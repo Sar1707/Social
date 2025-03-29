@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCIAL Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f0f0f;
+            color: #fff;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .container {
+            background-color: #1f1f1f;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        h1 {
+            color: #ff0000;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            background-color: #333;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #272727;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .tab {
+            padding: 10px 15px;
+            background-color: #333;
+            cursor: pointer;
+        }
+        .tab.active {
+            background-color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SOCIAL Login Test</h1>
+        <p>Use this form to test the login API endpoint directly.</p>
+        
+        <div class="tab-container">
+            <div id="email-tab" class="tab active" onclick="setLoginMethod('email')">Email</div>
+            <div id="username-tab" class="tab" onclick="setLoginMethod('username')">Username</div>
+        </div>
+        
+        <div id="email-form">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="Enter your email">
+        </div>
+        
+        <div id="username-form" style="display: none;">
+            <label for="username">Username:</label>
+            <input type="text" id="username" placeholder="Enter your username">
+        </div>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" placeholder="Enter your password">
+        
+        <button onclick="testLogin()">Login</button>
+        <button onclick="testRegister()">Test Register</button>
+        <button onclick="checkHealth()">Check API Health</button>
+        
+        <div id="response">Response will appear here...</div>
+    </div>
+
+    <script>
+        let loginMethod = 'email';
+        
+        function setLoginMethod(method) {
+            loginMethod = method;
+            
+            // Update UI
+            if (method === 'email') {
+                document.getElementById('email-tab').classList.add('active');
+                document.getElementById('username-tab').classList.remove('active');
+                document.getElementById('email-form').style.display = 'block';
+                document.getElementById('username-form').style.display = 'none';
+            } else {
+                document.getElementById('email-tab').classList.remove('active');
+                document.getElementById('username-tab').classList.add('active');
+                document.getElementById('email-form').style.display = 'none';
+                document.getElementById('username-form').style.display = 'block';
+            }
+        }
+        
+        async function testLogin() {
+            const responseDiv = document.getElementById('response');
+            const password = document.getElementById('password').value;
+            
+            let data;
+            if (loginMethod === 'email') {
+                const email = document.getElementById('email').value;
+                data = { email, password };
+            } else {
+                const username = document.getElementById('username').value;
+                data = { username, password };
+            }
+            
+            responseDiv.textContent = 'Sending request...';
+            
+            try {
+                // First try the normal endpoint
+                const response = await fetch('http://localhost:8001/api/v1/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'include'
+                });
+                
+                const result = await response.json();
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    alert('Login successful!');
+                }
+            } catch (error) {
+                responseDiv.textContent = 'Error: ' + error.message + '\n\nTrying backup endpoint...';
+                
+                // Try the test login endpoint if the normal one fails
+                try {
+                    const backupResponse = await fetch('http://localhost:8001/api/v1/test-login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const backupResult = await backupResponse.json();
+                    responseDiv.textContent += '\n\nBackup endpoint response:\n' + JSON.stringify(backupResult, null, 2);
+                } catch (backupError) {
+                    responseDiv.textContent += '\n\nBackup endpoint error: ' + backupError.message;
+                }
+            }
+        }
+        
+        async function testRegister() {
+            window.location.href = '/register.html';
+        }
+        
+        async function checkHealth() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = 'Checking API health...';
+            
+            try {
+                const response = await fetch('http://localhost:8001/api/v1/healthcheck');
+                const result = await response.json();
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                responseDiv.textContent = 'Error checking API health: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html> 

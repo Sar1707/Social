@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Socials - A full stack web app.",
   "type": "module",
-  "main": "index.js",
+  "main": "backend/server.js",
   "scripts": {
-    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
-    "start": "node src/index.js"
+    "dev": "nodemon -r dotenv/config --experimental-json-modules backend/server.js",
+    "start": "node backend/server.js",
+    "frontend": "cd frontend && npm run dev"
   },
   "author": "Sarvesh Gupta",
   "license": "ISC",
@@ -16,9 +17,11 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cloudinary": "^2.4.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
